@@ -84,8 +84,8 @@ with st.sidebar:
     raio = st.slider(
         "Raio do polígono (metros)",
         min_value=10,
-        max_value=100,
-        value=40,
+        max_value=150,
+        value=120,
         step=5,
         help="Distância do centro até a borda do quadrado"
     )
@@ -400,7 +400,7 @@ with st.sidebar:
     
     **Funcionalidades:**
     - Extrai pontos (placemarks)
-    - Cria quadrados de 40m
+    - Cria quadrados de EX:40m
     - Une polígonos que se tocam
     - Visualização interativa
     """)
