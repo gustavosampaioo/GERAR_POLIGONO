@@ -1,7 +1,7 @@
 """
 Processador de KML para Streamlit
-Autor: Assistente AI
-Descrição: Aplicação para processar KMLs com pontos e gerar polígonos de 40m
+Autor: Assistente
+Descrição: Aplicação para processar KMLs com pontos e gerar polígonos
 """
 
 import sys
@@ -65,7 +65,7 @@ import pandas as pd
 
 # Configuração da página
 st.set_page_config(
-    page_title="Processador de KML - Polígonos de 40m",
+    page_title="Processador de KML",
     page_icon="🗺️",
     layout="wide"
 )
@@ -73,7 +73,7 @@ st.set_page_config(
 # Título e descrição
 st.title("🗺️ Processador de KML - Polígonos de 40m")
 st.markdown("""
-Esta aplicação processa arquivos KML com placemarks do tipo Point e gera polígonos quadrados de 40 metros de raio.
+Esta aplicação processa arquivos KML com placemarks do tipo Point e gera polígonos quadrados.
 Polígonos que se intersectam são automaticamente unidos.
 """)
 
@@ -92,7 +92,7 @@ with st.sidebar:
     
     cor_poligono = st.color_picker(
         "Cor do polígono",
-        value="#FF0000",
+        value="#3200FF",
         help="Cor dos polígonos no mapa"
     )
     
@@ -400,7 +400,7 @@ with st.sidebar:
     
     **Funcionalidades:**
     - Extrai pontos (placemarks)
-    - Cria quadrados de EX:40m
+    - Cria quadrados de EX:200m
     - Une polígonos que se tocam
     - Visualização interativa
     """)
