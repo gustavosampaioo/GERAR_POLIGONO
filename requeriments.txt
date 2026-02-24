@@ -1,0 +1,8 @@
+streamlit
+shapely
+simplekml
+numpy
+pyproj
+folium
+streamlit-folium
+pandas
