@@ -84,8 +84,8 @@ with st.sidebar:
     raio = st.slider(
         "Raio do polígono (metros)",
         min_value=10,
-        max_value=150,
-        value=120,
+        max_value=300,
+        value=200,
         step=5,
         help="Distância do centro até a borda do quadrado"
     )
