@@ -71,7 +71,7 @@ st.set_page_config(
 )
 
 # Título e descrição
-st.title("🗺️ Processador de KML - Polígonos de 40m")
+st.title("🗺️ Processador de KML")
 st.markdown("""
 Esta aplicação processa arquivos KML com placemarks do tipo Point e gera polígonos quadrados.
 Polígonos que se intersectam são automaticamente unidos.
