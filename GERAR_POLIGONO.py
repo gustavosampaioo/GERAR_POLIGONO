@@ -1,3 +1,54 @@
+"""
+Processador de KML para Streamlit
+Autor: Assistente AI
+Descrição: Aplicação para processar KMLs com pontos e gerar polígonos de 40m
+"""
+
+import sys
+import subprocess
+import importlib.util
+
+# Função para verificar e instalar pacotes
+def check_and_install_packages():
+    """Verifica se os pacotes necessários estão instalados"""
+    required_packages = [
+        'streamlit',
+        'shapely',
+        'simplekml',
+        'numpy',
+        'pyproj',
+        'folium',
+        'streamlit_folium',
+        'pandas'
+    ]
+    
+    missing_packages = []
+    
+    for package in required_packages:
+        spec = importlib.util.find_spec(package)
+        if spec is None:
+            missing_packages.append(package)
+    
+    if missing_packages:
+        print("=" * 60)
+        print("PACOTES FALTANDO!")
+        print("=" * 60)
+        print(f"Os seguintes pacotes não estão instalados: {', '.join(missing_packages)}")
+        print("\nPara instalar, execute no terminal:")
+        print(f"pip install {' '.join(missing_packages)}")
+        print("\nOu instale todos de uma vez:")
+        print("pip install -r requirements.txt")
+        print("=" * 60)
+        return False
+    
+    return True
+
+# Verificar dependências antes de continuar
+if not check_and_install_packages():
+    print("\n❌ Por favor, instale as dependências faltantes e execute novamente.")
+    sys.exit(1)
+
+# Agora importamos os pacotes
 import streamlit as st
 import xml.etree.ElementTree as ET
 import math
@@ -134,16 +185,20 @@ def merge_intersecting_polygons(polygons):
     if len(polygons) == 1:
         return polygons
     
-    # Usar unary_union para unir todos os polígonos
-    merged = unary_union(polygons)
-    
-    # Se o resultado for MultiPolygon, separar em polígonos individuais
-    if merged.geom_type == 'MultiPolygon':
-        return list(merged.geoms)
-    elif merged.geom_type == 'Polygon':
-        return [merged]
-    else:
-        return []
+    try:
+        # Usar unary_union para unir todos os polígonos
+        merged = unary_union(polygons)
+        
+        # Se o resultado for MultiPolygon, separar em polígonos individuais
+        if merged.geom_type == 'MultiPolygon':
+            return list(merged.geoms)
+        elif merged.geom_type == 'Polygon':
+            return [merged]
+        else:
+            return []
+    except Exception as e:
+        st.error(f"Erro ao unir polígonos: {str(e)}")
+        return polygons
 
 def create_output_kml(polygons, placemarks, radius, color, opacity):
     """Cria um novo KML com os polígonos processados"""
@@ -261,6 +316,7 @@ if uploaded_file is not None:
                 merged_polygons = merge_intersecting_polygons(individual_polygons)
                 
                 # Atualizar métrica
+                st.session_state['merged_polygons'] = merged_polygons
                 col2.metric("📐 Polígonos após união", len(merged_polygons))
                 
                 # Criar KML de saída
@@ -285,7 +341,6 @@ if uploaded_file is not None:
                 os.unlink(tmp_file.name)
                 
                 # Salvar no session state para visualização
-                st.session_state['merged_polygons'] = merged_polygons
                 st.session_state['placemarks'] = placemarks
                 st.success(f"✅ Processamento concluído! {len(merged_polygons)} polígono(s) gerado(s).")
     
@@ -314,8 +369,20 @@ if 'merged_polygons' in st.session_state and st.session_state['merged_polygons']
         with col1:
             st.metric("Total de polígonos", len(st.session_state['merged_polygons']))
         with col2:
-            total_area = sum(poly.area for poly in st.session_state['merged_polygons']) * 111000 * 111000
-            st.metric("Área total aproximada", f"{total_area/1000000:.2f} km²")
+            # Calcular área aproximada
+            total_area = 0
+            for poly in st.session_state['merged_polygons']:
+                if poly.geom_type == 'Polygon':
+                    # Conversão aproximada de graus² para km²
+                    area_degrees = poly.area
+                    # Fator de conversão aproximado (considerando latitude média)
+                    avg_lat = sum(pm['lat'] for pm in st.session_state['placemarks']) / len(st.session_state['placemarks'])
+                    km_per_degree_lat = 111
+                    km_per_degree_lon = 111 * math.cos(math.radians(avg_lat))
+                    area_km2 = area_degrees * km_per_degree_lat * km_per_degree_lon
+                    total_area += area_km2
+            
+            st.metric("Área total aproximada", f"{total_area:.2f} km²")
         with col3:
             st.metric("Polígonos originais", len(st.session_state['placemarks']))
 
